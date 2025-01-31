@@ -34,9 +34,21 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        filter: tree:0
+
+    - name: Set safe directory in container
+      run: /usr/bin/git config --global --add safe.directory ${GITHUB_WORKSPACE}
+
+    - name: Define debos version
+      run: echo "DEBOS_VER=$(git describe --always --tags HEAD)" >> "$GITHUB_ENV"
 
     - name: Test build
-      run: go build -o debos cmd/debos/debos.go
+      run: go build -ldflags="-X main.Version=${DEBOS_VER}" ./cmd/debos
+
+    - name: Print debos version
+      run: ./debos --version
 
     - name: Run unit tests
       run: go test -v ./... | tee test.out
