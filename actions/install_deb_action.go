@@ -74,6 +74,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"slices"
 	"strings"
 
 	"github.com/go-debos/debos"
@@ -138,15 +139,13 @@ func (apt *InstallDebAction) Run(context *debos.DebosContext) error {
 		packages = append(packages, origin)
 	}
 
+	// Deduplicate packages after globbing
+	slices.Sort(packages)
+	packages = slices.Compact(packages)
+
 	/* bind mount each package into rootfs & update the list with the
 	 * path relative to the chroot */
 	for idx, pkg := range packages {
-		// check for duplicates after globbing
-		for j := idx + 1; j < len(packages); j++ {
-			if packages[j] == pkg {
-				return fmt.Errorf("duplicate package found: %s", pkg)
-			}
-		}
 
 		log.Printf("Installing %s", pkg)
 
