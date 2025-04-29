@@ -1,5 +1,5 @@
 /*
-InstallDpkg Action
+InstallDeb Action
 
 Install packages from .deb files and their dependencies to the target rootfs
 using 'apt'.
@@ -13,7 +13,7 @@ Attempting to downgrade packages which are already installed is not allowed and
 will throw an error.
 
  # Yaml syntax:
- - action: install-dpkg
+ - action: install-deb
    origin: name
    recommends: bool
    unauthenticated: bool
@@ -41,14 +41,14 @@ Optional properties:
 
 Example to install all packages from recipe subdirectory `pkgs/`:
 
- - action: install-dpkg
+ - action: install-deb
    description: Install Debian packages from local recipe
    packages:
      - pkgs/*.deb
 
 Example to install named packages from recipe subdirectory `pkgs/`:
 
- - action: install-dpkg
+ - action: install-deb
    description: Install Debian packages from local recipe
    packages:
      - pkgs/bmap-tools_*_all.deb
@@ -61,7 +61,7 @@ Example to download and install a package:
    url: http://ftp.us.debian.org/debian/pool/main/b/bmap-tools/bmap-tools_3.5-2_all.deb
    name: bmap-tools-pkg
 
- - action: install-dpkg
+ - action: install-deb
    description: Install Debian package from url
    origin: bmap-tools-pkg
 */
@@ -80,7 +80,7 @@ import (
 	"github.com/go-debos/debos/wrapper"
 )
 
-type InstallDpkgAction struct {
+type InstallDebAction struct {
 	debos.BaseAction `yaml:",inline"`
 	Recommends       bool
 	Unauthenticated  bool
@@ -89,13 +89,13 @@ type InstallDpkgAction struct {
 	Packages         []string
 }
 
-func NewInstallDpkgAction() *InstallDpkgAction {
-	a := &InstallDpkgAction{Update: true}
+func NewInstallDebAction() *InstallDebAction {
+	a := &InstallDebAction{Update: true}
 	return a
 }
 
-func (apt *InstallDpkgAction) Run(context *debos.DebosContext) error {
-	aptCommand := wrapper.NewAptCommand(*context, "install-dpkg")
+func (apt *InstallDebAction) Run(context *debos.DebosContext) error {
+	aptCommand := wrapper.NewAptCommand(*context, "install-deb")
 
 	/* check if named origin exists or fallback to RecipeDir if no origin set */
 	var origin string = context.RecipeDir
