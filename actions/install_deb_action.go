@@ -90,8 +90,7 @@ type InstallDebAction struct {
 }
 
 func NewInstallDebAction() *InstallDebAction {
-	a := &InstallDebAction{Update: true}
-	return a
+	return &InstallDebAction{Update: true}
 }
 
 func (apt *InstallDebAction) Run(context *debos.DebosContext) error {
