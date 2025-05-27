@@ -106,7 +106,7 @@ for partition.
 - partattrs -- list of GPT partition attribute bits to set, as defined in
 https://uefi.org/specs/UEFI/2.10/05_GUID_Partition_Table_Format.html#defined-gpt-partition-entry-attributes.
 Bit 0: "Required Partition", bit 1: "No Block IO Protocol", bit 2: "Legacy BIOS
-Bootable". Bits 3-47 are reserved. Bits 48 - 63 are GUID specific. For example,
+Bootable". Bits 3-47 are reserved. Bits 48-63 are GUID specific. For example,
 ChromeOS Kernel partitions (GUID=fe3a2a5d-4f32-41a7-b725-accc3285a309) use bit
 56 for "successful boot" and bits 48-51 for "priority", where 0 means not
 bootable, thus bits 56 and 48 need to be set through this property in order to
@@ -194,7 +194,6 @@ import (
 	"sort"
 	"strconv"
 	"strings"
-	"strconv"
 	"syscall"
 	"time"
 	"regexp"
@@ -601,6 +600,18 @@ func (i ImagePartitionAction) Run(context *debos.DebosContext) error {
 		}
 
 		if p.PartAttrs != nil && len(p.PartAttrs) > 0 {
+			/* Convert bits numbers to bits names due to a libfdisk's limitation
+			 * https://github.com/util-linux/util-linux/issues/3353
+			 */
+			for idx, attr := range p.PartAttrs {
+				switch attr {
+				case "0":
+					p.PartAttrs[idx] = "RequiredPartition"
+				case "1":
+					p.PartAttrs[idx] = "NoBlockIOProtocol"
+				case "2":
+					p.PartAttrs[idx] = "LegacyBIOSBootable"
+			}
 			err = debos.Command{}.Run("sfdisk", "sfdisk", "--part-attrs", context.Image, fmt.Sprintf("%d", p.number), strings.Join(p.PartAttrs, ","))
 			if err != nil {
 				return err
